@@ -33,18 +33,10 @@ app.get('/', async (req, res) => {
 
   const existingToken = csrfTokens.find((token) => token[sessionId]);
 
-  if (existingToken[sessionId] !== req.body.csrfToken) {
-    return res.send({ error: 'Invalid Token' });
-  }
-
   if (!existingToken) {
     const csrfToken = randomBytes(16).toString('hex');
     csrfTokens.push({ [sessionId]: csrfToken });
     await writeFile('./csrfToken.json', JSON.stringify(csrfTokens, null, 2));
-
-    res.cookie('csrfToken', csrfToken, { httpOnly: true, sameSite: 'none', secure: true });
-    console.log({ csrfToken });
-
     res.send(`
     <!DOCTYPE html>
     <html>
@@ -62,16 +54,20 @@ app.get('/', async (req, res) => {
     </html>
   `);
   }
+  res.send({message:'welcome to home'})
 });
 
 // Handle payment
 app.post('/pay', (req, res) => {
-  console.log(req.body);
-  if (!req.cookies.sid) {
+  const sessionId = req.cookies.sid;
+  if (!sessionId) {
     return res.send('You are not logged.');
   }
-  if (req.body.csrfToken !== req.cookies.csrfToken) {
-    return res.send('Invalid CSRF Token.');
+  const existingToken = csrfTokens.find((token) => token[sessionId]);
+  console.log(existingToken[sessionId]);
+  console.log(req.body.csrfToken)
+  if (existingToken[sessionId] !== req.body.csrfToken) {
+    return res.send({ error: 'Invalid Token' });
   }
   amount = 0;
   res.redirect('/');
