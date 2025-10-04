@@ -3,6 +3,7 @@ import cookieParse from 'cookie-parser';
 import { randomBytes } from 'crypto';
 import csrfTokens from './csrfToken.json' with { type: 'json' };
 import { writeFile } from 'fs/promises';
+import { verifyCsrfToken } from './middlewares/csrfToken';
 
 const app = express();
 const PORT = 4000;
@@ -54,21 +55,16 @@ app.get('/', async (req, res) => {
     </html>
   `);
   }
-  res.send({message:'welcome to home'})
+  res.send({ message: 'welcome to home' });
 });
 
 // Handle payment
-app.post('/pay', (req, res) => {
+app.post('/pay', verifyCsrfToken, (req, res) => {
   const sessionId = req.cookies.sid;
   if (!sessionId) {
     return res.send('You are not logged.');
   }
-  const existingToken = csrfTokens.find((token) => token[sessionId]);
-  console.log(existingToken[sessionId]);
-  console.log(req.body.csrfToken)
-  if (existingToken[sessionId] !== req.body.csrfToken) {
-    return res.send({ error: 'Invalid Token' });
-  }
+
   amount = 0;
   res.redirect('/');
 });
