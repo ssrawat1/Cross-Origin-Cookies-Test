@@ -1,6 +1,8 @@
 import express from 'express';
 import cookieParse from 'cookie-parser';
 import { randomBytes } from 'crypto';
+import csrfTokens from './csrfToken.json' with { type: 'json' };
+import { writeFile } from 'fs/promises';
 
 const app = express();
 const PORT = 4000;
@@ -23,14 +25,27 @@ app.use((req, res, next) => {
 });
 
 // Serve dynamic HTML
-app.get('/', (req, res) => {
-  if (!req.cookies.sid) {
+app.get('/', async (req, res) => {
+  const sessionId = req.cookies.sid;
+  if (!sessionId) {
     return res.send('You are not logged <br> <a href="/login">Login</a>');
   }
-  const csrfToken = randomBytes(16).toString('hex');
-  res.cookie('csrfToken', csrfToken, { httpOnly: true, sameSite: 'none', secure: true });
-  console.log({ csrfToken });
-  res.send(`
+
+  const existingToken = csrfTokens.find((token) => token[sessionId]);
+
+  if (existingToken[sessionId] !== req.body.csrfToken) {
+    return res.send({ error: 'Invalid Token' });
+  }
+
+  if (!existingToken) {
+    const csrfToken = randomBytes(16).toString('hex');
+    csrfTokens.push({ [sessionId]: csrfToken });
+    await writeFile('./csrfToken.json', JSON.stringify(csrfTokens, null, 2));
+
+    res.cookie('csrfToken', csrfToken, { httpOnly: true, sameSite: 'none', secure: true });
+    console.log({ csrfToken });
+
+    res.send(`
     <!DOCTYPE html>
     <html>
     <head>
@@ -46,6 +61,7 @@ app.get('/', (req, res) => {
     </body>
     </html>
   `);
+  }
 });
 
 // Handle payment
