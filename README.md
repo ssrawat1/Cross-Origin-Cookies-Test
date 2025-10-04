@@ -13,8 +13,18 @@ Experiment with how browsers **set** and **send** cookies across domains using `
 
 ---
 
+## Practical Tip
+
+If your application runs on different domains, you must use `SameSite='None'` for cross-domain cookies.  
+⚠️ This is not recommended unless necessary. To mitigate CSRF risks, always use **CSRF tokens** or **custom headers** combined with proper **CORS** configuration.
+
 ## Quick Setup
 
  ```text
 http://127.0.0.1:5500/CSRF/index.html   Frontend
 http://localhost:4000/                  Backend
+
+
+
+
+
