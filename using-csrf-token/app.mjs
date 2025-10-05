@@ -3,7 +3,7 @@ import cookieParse from 'cookie-parser';
 import { randomBytes } from 'crypto';
 import csrfTokens from './csrfToken.json' with { type: 'json' };
 import { writeFile } from 'fs/promises';
-import { verifyCsrfToken } from './middlewares/csrfToken';
+import { verifyCsrfToken } from './middlewares/csrfToken.mjs';
 
 const app = express();
 const PORT = 4000;
